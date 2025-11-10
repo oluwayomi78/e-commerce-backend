@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const Product = require("../Models/productModel");
+const Product = require("../models/productModel");
 const cloudinary = require("../config/cloudinaryConfig");
 
 const getProducts = asyncHandler(async (req, res) => {
