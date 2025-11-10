@@ -12,7 +12,7 @@ const chatRoutes = require("./routes/chatRoutes.js")
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const corsOptions = {
-    origin: ['http://localhost:5174', 'https://luxemart-ghhx.vercel.app', 'http://localhost:5173'],
+    origin: ['http://localhost:5174', 'https://luxemart-peach.vercel.app', 'https://luxemart.preciousenoch459.workers.dev', 'http://localhost:5174'],
 };
 
 const app = express();
