@@ -11,8 +11,12 @@ const contactRoutes = require("./routes/contactRoutes.js")
 const chatRoutes = require("./routes/chatRoutes.js")
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
+const corsOptions = {
+    origin: ['http://localhost:5174', 'https://luxemart-u343.vercel.app'], // This is your frontend URL
+};
+
 const app = express();
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
