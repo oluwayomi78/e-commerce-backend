@@ -42,17 +42,13 @@ const uri = process.env.URI;
 mongoose.set("strictQuery", false);
 mongoose
     .connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log("✅ Connected to MongoDB"))
-    .catch((err) => console.error("❌ MongoDB Connection Error:", err));
+    .then(() => console.log(" Connected to MongoDB"))
+    .catch((err) => console.error(" MongoDB Connection Error:", err));
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-const PORT = process.env.PORT || 5300;
-
 app.get("/", (req, res) => {
-    res.send("🚀 LuxeMart API is running...");
+    res.send(" LuxeMart API is running...");
 });
 
-app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
-});
+module.exports = app;
