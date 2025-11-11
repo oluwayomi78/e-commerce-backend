@@ -25,51 +25,48 @@ const registerUser = asyncHandler(async (req, res) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
         return res.status(400).json({ message: "Please enter a valid email" })
-    }
-    if (password.length < 6) {
-        return res.status(400).json({ message: "Password must be at least 6 characters long" })
-    }
+        {
+            return res.status(400).json({ message: "Password must be at least 6 characters long" })
+        }
 
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-        return res.status(400).json({ message: "User already exists" });
-    }
+        const userExists = await User.findOne({ email });
+        if (userExists) {
+            return res.status(400).json({ message: "User already exists" });
+        }
 
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    const user = await User.create({
-        name,
-        email,
-        password: hashedPassword,
-    });
+        const user = await User.create({
+            name,
+            email,
+            password: hashedPassword,
+        });
 
-    if (user) {
-        try {
+        if (user) {
             const mailOptions = {
                 from: `"LuxeMart" <${process.env.EMAIL_USER}>`,
                 to: user.email,
                 subject: `Welcome to LuxeMart, ${user.name}!`,
                 html: `<h1>Hi ${user.name},</h1><p>Welcome to LuxeMart! We're excited to have you.</p>`,
             };
-            
-            await transporter.sendMail(mailOptions);
 
-        } catch (emailError) {
-            console.error("Failed to send welcome email:", emailError);
+            transporter.sendMail(mailOptions).catch(emailError => {
+                console.error("Failed to send welcome email:", emailError);
+            });
+
+            res.status(201).json({
+                message: "User created successfully",
+                user: {
+                    _id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    isAdmin: user.isAdmin,
+                },
+                token: generateAccessToken(user._id),
+            });
+        } else {
+            res.status(400).json({ message: "Invalid user data" });
         }
-
-        res.status(201).json({
-            message: "User created successfully",
-            user: {
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                isAdmin: user.isAdmin,
-            },
-            token: generateAccessToken(user._id),
-        });
-    } else {
-        res.status(400).json({ message: "Invalid user data" });
     }
 });
 
@@ -91,19 +88,16 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 
     if (user && passwordMatch) {
-        try {
-            const mailOptions = {
-                from: `"LuxeMart Security" <${process.env.EMAIL_USER}>`,
-                to: user.email,
-                subject: 'New Login to Your LuxeMart Account',
-                html: `<h1>Hi ${user.name},</h1><p>We detected a new login to your account. If this was you, you can safely ignore this email.</p><p>If this was not you, please change your password immediately.</p>`,
-            };
-            
-            await transporter.sendMail(mailOptions);
+        const mailOptions = {
+            from: `"LuxeMart Security" <${process.env.EMAIL_USER}>`,
+            to: user.email,
+            subject: 'New Login to Your LuxeMart Account',
+            html: `<h1>Hi ${user.name},</h1><p>We detected a new login to your account. If this was you, you can safely ignore this email.</p><p>If this was not you, please change your password immediately.</p>`,
+        };
 
-        } catch (emailError) {
+        transporter.sendMail(mailOptions).catch(emailError => {
             console.error("Failed to send login email:", emailError);
-        }
+        });
 
         res.status(200).json({
             message: "Login successful",
@@ -142,6 +136,7 @@ const googleLogin = asyncHandler(async (req, res) => {
                     isAdmin: user.isAdmin,
                 },
                 token: generateAccessToken(user._id),
+                Details
             });
         } else {
             const hashedPassword = await bcrypt.hash(googleId, saltRounds);
@@ -150,22 +145,20 @@ const googleLogin = asyncHandler(async (req, res) => {
                 name,
                 email,
                 password: hashedPassword,
+                i
             });
 
             if (user) {
-                try {
-                    const mailOptions = {
-                        from: `"LuxeMart" <${process.env.EMAIL_USER}>`,
-                        to: user.email,
-                        subject: `Welcome to LuxeMart, ${user.name}!`,
-                        html: `<h1>Hi ${user.name},</h1><p>Welcome to LuxeMart! We're excited to have you.</p>`,
-                    };
-                    
-                    await transporter.sendMail(mailOptions);
+                const mailOptions = {
+                    from: `"LuxeMart" <${process.env.EMAIL_USER}>`,
+                    to: user.email,
+                    subject: `Welcome to LuxeMart, ${user.name}!`,
+                    html: `<h1>Hi ${user.name},</h1><p>Welcome to LuxeMart! We're excited to have you.</p>`,
+                };
 
-                } catch (emailError) {
+                transporter.sendMail(mailOptions).catch(emailError => {
                     console.error("Failed to send welcome email:", emailError);
-                }
+                });
 
                 res.status(201).json({
                     message: "User created successfully",
