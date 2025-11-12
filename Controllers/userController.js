@@ -51,7 +51,7 @@ const registerUser = asyncHandler(async (req, res) => {
                 subject: `Welcome to LuxeMart, ${user.name}!`,
                 html: `<h1>Hi ${user.name},</h1><p>Welcome to LuxeMart! We're excited to have you.</p>`,
             };
-            
+
             await transporter.sendMail(mailOptions);
 
         } catch (emailError) {
@@ -98,7 +98,7 @@ const loginUser = asyncHandler(async (req, res) => {
                 subject: 'New Login to Your LuxeMart Account',
                 html: `<h1>Hi ${user.name},</h1><p>We detected a new login to your account. If this was you, you can safely ignore this email.</p><p>If this was not you, please change your password immediately.</p>`,
             };
-            
+
             await transporter.sendMail(mailOptions);
 
         } catch (emailError) {
@@ -160,7 +160,7 @@ const googleLogin = asyncHandler(async (req, res) => {
                         subject: `Welcome to LuxeMart, ${user.name}!`,
                         html: `<h1>Hi ${user.name},</h1><p>Welcome to LuxeMart! We're excited to have you.</p>`,
                     };
-                    
+
                     await transporter.sendMail(mailOptions);
 
                 } catch (emailError) {
@@ -187,9 +187,43 @@ const googleLogin = asyncHandler(async (req, res) => {
     }
 });
 
+
+const updateUser = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.id);
+
+    if (user) {
+        user.name = req.body.name || user.name;
+        user.email = req.body.email || user.email;
+        user.isAdmin = req.body.isAdmin;
+
+        const updatedUser = await user.save();
+        res.status(200).json({
+            _id: updatedUser._id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            isAdmin: updatedUser.isAdmin,
+        });
+    } else {
+        res.status(404);
+        throw new Error('User not found');
+    }
+});
+
+const getUserById = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.id).select('-password');
+
+    if (user) {
+        res.status(200).json(user);
+    } else {
+        res.status(404);
+        throw new Error('User not found');
+    }
+});
 module.exports = {
     registerUser,
     loginUser,
     getUsers,
     googleLogin,
+    updateUser,
+    getUserById,
 };
